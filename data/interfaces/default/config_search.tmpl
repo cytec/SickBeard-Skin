@@ -1,0 +1,213 @@
+#import sickbeard
+#set global $title="Config - Episode Search"
+#set global $header="Search Options"
+
+#set global $sbPath="../.."
+
+#set global $topmenu="config"#
+#import os.path
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+
+<script type="text/javascript" src="$sbRoot/js/configSearch.js"></script>
+<script type="text/javascript" src="$sbRoot/js/config.js"></script>
+
+<div id="config">
+<div id="config-content">
+    <div class="alert">
+        <h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.DATA_DIR</span> "</h5>
+    </div>
+
+<form id="configForm" action="saveSearch" class="form form-horizontal" method="post">
+    
+    <fieldset>
+        <legend>Episode Search
+            <small>Settings that dictate how and when episode searching works with <a href="$sbRoot/config/providers">Providers</a>.</small>
+        </legend>
+        <div class="control-group">
+            <label class="control-label" for="download_propers">Download Propers</label>
+            <div class="controls">
+                <label class="checkbox">
+                    <input type="checkbox" class="checkbox inline" name="download_propers" id="download_propers" #if $sickbeard.DOWNLOAD_PROPERS == True then "checked=\"checked\"" else ""# />
+                    Replace original download with "Proper/Repack" if nuked?
+                </label>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="search_frequency">Search Frequency</label>
+            <div class="controls">
+                <input type="text" size="5" class="input-xlarge" value="$sickbeard.SEARCH_FREQUENCY" id="search_frequency" name="search_frequency">
+                <p class="help-block">Time in minutes between searches (eg. 60)</p>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="usenet_retention">Usenet Retention</label>
+            <div class="controls">
+                <input type="text" size="5" class="input-xlarge" value="$sickbeard.USENET_RETENTION" id="usenet_retention" name="usenet_retention">
+                <p class="help-block">Age limit in days for usenet articles to be used. (eg. 500)</p>
+            </div>
+        </div>
+        <div class="form-actions">
+            <input type="submit" class="config_submitter btn btn-success" value="Save Changes" /><br/>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>NZB Search
+            <small>Settings that dictate how Sick Beard handles NZB search results.</small>
+        </legend>
+        <div class="control-group">
+            <label class="control-label" for="use_nzbs">Search NZBs</label>
+            <div class="controls">
+                <label class="checkbox">
+                    <input type="checkbox" class="enabler checkbox inline" name="use_nzbs" id="use_nzbs" #if $sickbeard.USE_NZBS then "checked=\"checked\"" else ""# />
+                    Should Sick Beard search for NZB files?
+                </label>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="nzb_method">NZB Method:</label>
+            <div class="controls">
+                <select name="nzb_method" id="nzb_method">
+                    #set $nzb_method_text = {'blackhole': "Black hole", 'sabnzbd': "SABnzbd", 'nzbget': "NZBget"}
+                    #for $curAction in ('sabnzbd', 'blackhole', 'nzbget'):
+                        #if $sickbeard.NZB_METHOD == $curAction:
+                            #set $nzb_method = "selected=\"selected\""
+                        #else
+                            #set $nzb_method = ""
+                        #end if
+                        <option value="$curAction" $nzb_method>$nzb_method_text[$curAction]</option>
+                    #end for
+                </select>
+                <p class="help-block">What sould SickBeard do with NZBs</p>
+            </div>
+        </div>
+        <div id="blackhole_settings" class="control-group">
+            <label class="control-label" for="nzb_dir">NZB Black Hole</label>
+            <div class="controls">
+                <div class="input-append">
+                    <input type="text" class="input-xlarge" name="nzb_dir" id="nzb_dir" value="$sickbeard.NZB_DIR" size="45">
+                    <p class="help-block">The directory where Sick Beard should store your <b>NZB</b> files.</p>
+                </div>
+            </div>
+        </div>
+
+
+        <!--- SABNZBD SETTINGS --> 
+        <div id="sabnzbd_settings">
+            <div class="control-group">
+                <label class="control-label" for="sab_host">SABnzbd URL</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="sab_host" id="sab_host" value="$sickbeard.SAB_HOST" size="45">
+                    <p class="help-block">URL to your SABnzbd+ install<br />(eg. http://localhost:8000/)</p>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="sab_username">SABnzbd Username</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="sab_username" id="sab_username" value="$sickbeard.SAB_USERNAME" size="20">
+                    <p class="help-block">Username of your SABnzbd+ server (blank for none)</p>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="sab_password">SABnzbd Password</label>
+                <div class="controls">
+                    <input type="password" class="input-xlarge" name="sab_password" id="sab_password" value="$sickbeard.SAB_PASSWORD" size="20">
+                    <p class="help-block">Password of your SABnzbd+ server (blank for none)</p>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="sab_apikey">SABnzbd API Key</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="sab_apikey" id="sab_apikey" value="$sickbeard.SAB_APIKEY" size="45">
+                    <p class="help-block">SABnzbd+ Config -> General -> API Key.</p>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="sab_category">SABnzbd Category</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="sab_category" id="sab_category" value="$sickbeard.SAB_CATEGORY" size="45">
+                    <p class="help-block">Category for downloads to go into (eg. TV)</p>
+                </div>
+            </div>
+            <div class="testNotification control-group">
+                <label class="control-label" for="nzbget_category">Test SAB Connection</label>
+                <div class="controls">
+                    <input type="button" value="Test SABnzbd" id="testSABnzbd" class="btn test-button"/>
+                    <p id="testSABnzbd-result" class="help-block">Test your SABnzbd+ Connection Settings</p>
+                </div>
+            </div>
+        </div>
+        <div id="nzbget_settings">
+            <div class="control-group">
+                <label class="control-label" for="nzbget_host">NZBget HOST:PORT</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="nzbget_host" id="nzbget_host" value="$sickbeard.NZBGET_HOST" size="45">
+                    <p class="help-block">Hostname and portnumber of the NZBget RPC (not NZBgetweb!)<br />(eg. localhost:6789)</p>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="nzbget_password">NZBget Password</label>
+                <div class="controls">
+                    <input type="password" class="input-xlarge" name="nzbget_password" id="nzbget_password" value="$sickbeard.NZBGET_PASSWORD" size="45">
+                    <p class="help-block">Password found in nzbget.conf (by default tegbzn6789)</p>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="nzbget_category">NZBget Category</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="nzbget_category" id="nzbget_category" value="$sickbeard.NZBGET_CATEGORY" size="45">
+                    <p class="help-block">Category for downloads to go into (eg. TV)</p>
+                </div>
+            </div>
+        </div>  
+        <div class="form-actions">
+            <input type="submit" class="config_submitter btn btn-success" value="Save Changes" /><br/>
+        </div>
+    </fieldset>
+
+    <!-- Torrent Settings -->
+    <fieldset>
+        <legend>Torrent Search
+            <small>Settings that dictate how Sick Beard handles Torrent search results.</small>
+        </legend>
+        <div class="title-group clearfix alert alert-error" id="no-torrents">
+            <div class="ui-corner-all config_message">Note: Sick Beard works better with Usenet than with Torrents, <a href="http://www.sickbeard.com/usenet.html" target="_blank">here's why</a>.</div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="use_torrents">Search Torrents</label>
+            <div class="controls">
+                <label class="checkbox">
+                    <input type="checkbox" class="enabler checkbox inline" name="use_torrents" id="use_torrents" #if $sickbeard.USE_TORRENTS == True then "checked=\"checked\"" else ""# />
+                    Should Sick Beard search for torrent files?
+                </label>
+            </div>
+        </div>
+        <div id="content_use_torrents" class="control-group">
+            <label class="control-label" for="torrent_dir">Torrent Black Hole</label>
+            <div class="controls">
+                <div class="input-append">
+                    <input type="text" size="5" class="input-xlarge" value="$sickbeard.TORRENT_DIR" id="torrent_dir" name="torrent_dir">
+                    <p class="help-block">The directory where Sick Beard should store your <b>Torrent</b> files.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <input type="submit" class="config_submitter btn btn-success" value="Save Changes" /><br/>
+        </div>
+    </fieldset>
+
+                
+
+</form>
+
+
+<script type="text/javascript" charset="utf-8">
+<!--
+    jQuery('#nzb_dir').fileBrowser({ title: 'Select NZB Black Hole/Watch Directory' });
+    jQuery('#torrent_dir').fileBrowser({ title: 'Select Torrent Black Hole/Watch Directory' });
+    jQuery('#tv_download_dir').fileBrowser({ title: 'Select TV Download Directory' });
+//-->
+</script>
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

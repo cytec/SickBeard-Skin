@@ -1,0 +1,196 @@
+#import sickbeard
+#import sickbeard.helpers
+#from sickbeard.common import *
+#import os.path, os
+#import datetime
+#set global $title=$show.name
+#set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a>' % ($show.tvdbid, $show.name)
+
+#set global $topmenu="manageShows"#
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+
+<script type="text/javascript" src="$sbRoot/js/jquery.bookmarkscroll.js"></script>
+
+
+<div class="h2footer align-right">
+#if (len($seasonResults) > 14):
+    <select id="seasonJump">
+        <option value="jump">Jump to Season</option>
+    #for $seasonNum in $seasonResults:
+        <option value="#season-$seasonNum["season"]">#if int($seasonNum["season"]) == 0 then "Specials" else "Season " + str($seasonNum["season"])#</option>
+    #end for
+    </select>
+#else:
+    <b>Season:</b>
+    #for $seasonNum in $seasonResults:
+        #if int($seasonNum["season"]) == 0:
+            <a href="#season-$seasonNum["season"]">Specials</a>
+        #else:
+            <a href="#season-$seasonNum["season"]">${str($seasonNum["season"])}</a>
+        #end if
+        #if $seasonNum != $seasonResults[-1]:
+            <span class="separator">|</span>
+        #end if
+    #end for
+#end if
+</div><br/>
+
+#if $show_message:
+    <div id="show_message" class="ui-corner-all">$show_message</div><br />
+#end if
+
+<input type="hidden" id="sbRoot" value="$sbRoot" />
+
+<script type="text/javascript" src="$sbRoot/js/displayShow.js"></script>
+<script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
+<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js"></script>
+<div class="row">
+<div class="span8">
+<b class="span2">Change Show:</b>
+<div class="pull-left"><i id="prevShow" class="icon-chevron-left"></i></div>
+<div class="span3">
+<select class="span3" id="pickShow">
+#for $curShow in $sortedShowList:
+<option value="$curShow.tvdbid" #if $curShow == $show then "selected=\"selected\"" else ""#>$curShow.name</option>
+#end for
+</select>
+</div>
+<div class="span1" ><i id="nextShow" class="icon-chevron-right"></i></div>
+</div>
+</div>
+<div id="summary" class="align-left">
+<table class="infoTable table table-striped table-bordered table-condensed" cellspacing="1" border="0" cellpadding="0">
+#if $show.network and $show.airs:
+    <tr><td class="showLegend">Airs: </td><td>$show.airs on $show.network</td></tr>
+#else if $show.network:
+    <tr><td class="showLegend">Airs: </td><td>$show.network</td></tr>
+#else if $show.airs:
+    <tr><td class="showLegend">Airs: </td><td>$show.airs</td></tr>
+#end if
+    <tr><td class="showLegend">Status: </td><td>$show.status</td></tr>
+#if $showLoc[1]:
+    <tr class="hideon-phone"><td class="showLegend">Location: </td><td>$showLoc[0]</td></tr>
+#else:
+    <tr><td class="showLegend"><span style="color: red;">Location: </span></td><td><span style="color: red;">$showLoc[0]</span> (dir is missing)</td></tr>
+#end if
+#set $anyQualities, $bestQualities = $Quality.splitQuality(int($show.quality))
+    <tr><td class="showLegend">Quality: </td><td>
+#if $show.quality in $qualityPresets:
+$qualityPresetStrings[$show.quality]
+#else:
+#if $anyQualities:
+initially download: <b><%=", ".join([Quality.qualityStrings[x] for x in anyQualities])%></b> #if $bestQualities then " + " else ""#
+#end if
+#if $bestQualities:
+replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities])%></b>
+#end if 
+#end if
+    </td></tr>
+    <tr><td class="showLegend">Language:</td><td><img src="$sbRoot/images/flags/${show.lang}.png" width="16" height="11" alt="" /> $show.lang</td></tr>
+    <tr><td class="showLegend">Season Folders: </td><td>#if $show.seasonfolders == 1 then "<i class=\"icon-ok\"></i>" else "<i class=\"icon-remove\"></i>"#</td></tr>
+    <tr><td class="showLegend">Paused: </td><td>#if int($show.paused) == 1 then "<i class=\"icon-ok\"></i>" else "<i class=\"icon-remove\"></i>"#</td></tr>
+    <tr><td class="showLegend">Air-by-Date: </td><td>#if int($show.air_by_date) == 1 then "<i class=\"icon-ok\"></i>" else "<i class=\"icon-remove\"></i>"#</td></tr>
+</table>
+</div>
+
+<div class="float-left">
+<b>Change selected episodes to </b><br />
+<select id="statusSelect">
+#for $curStatus in [$WANTED, $SKIPPED, $ARCHIVED, $IGNORED] + $Quality.DOWNLOADED:
+#if $curStatus == $DOWNLOADED:
+#continue
+#end if
+<option value="$curStatus">$statusStrings[$curStatus]</option>
+#end for
+</select>
+<input type="hidden" id="showID" value="$show.tvdbid" />
+<input type="button" id="changeStatus" class="btn btn-success" value="Go" /><br />
+<br />
+<br />
+</div>
+
+#set $curSeason = -1
+#set $odd = 0
+<div class="row" style="margin-bottom: 10px">
+<div class="span4">
+<span class="selectAll"><a href="#" onclick="return false;" class="btn seriesCheck">Select Filtered Episodes</a></span> 
+<span class="clearAll"><a href="#" onclick="return false;" class="btn clearAll">Clear All</a></span>
+</div>
+<div class="span7 pull-right">
+<div class="pull-right" id="checkboxControls">
+<label for="wanted" class="checkbox inline"><span class="badge badge-error wanted">Wanted: <b>$epCounts[$Overview.WANTED]</b> <input type="checkbox" id="wanted" checked="checked" /></span></label>
+<label for="qual" class="checkbox inline"><span class="badge badge-warning qual">Low Quality: <b>$epCounts[$Overview.QUAL]</b> <input type="checkbox" id="qual" checked="checked" /></span></label>
+<label for="good" class="checkbox inline"><span class="badge badge-success good">Downloaded: <b>$epCounts[$Overview.GOOD]</b> <input type="checkbox" id="good" checked="checked" /></span></label>
+<label for="skipped" class="checkbox inline"><span class="badge badge-info skipped">Skipped: <b>$epCounts[$Overview.SKIPPED]</b> <input type="checkbox" id="skipped" checked="checked" /></span></label>
+<br />
+
+</div>
+</div>
+</div>
+<div style="clear:both;" class="clearfix"></div>
+
+<table class="sickbeardTable table table-striped table-condensed" cellspacing="1" border="0" cellpadding="0">
+    
+#for $epResult in $sqlResults:
+
+    #if int($epResult["season"]) != $curSeason:
+    <!-- <tr><td colspan="9"><a name="season-$epResult["season"]"></a></td></tr>  -->
+  <tr class="seasonheader" id="season-$epResult["season"]">
+    <td colspan="9">
+        <h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#</h2>
+    </td>
+  </tr>
+  <tr id="season-$epResult["season"]-cols">
+    <th  class="hideon-phone" width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]" /></th>
+    <th class="hideon-phone">NFO</th>
+    <th class="hideon-phone">TBN</th>
+    <th>Ep</th>
+    <th>Name</th>
+    <th class="nowrap hideon-phone">Airdate</th>
+    <th class="hideon-phone">Filename</th>
+    <th>Status</th>
+    <th>Search</th>
+    </tr>
+        #set $curSeason = int($epResult["season"])
+    #end if    
+
+  #set $epStr = str($epResult["season"]) + "x" + str($epResult["episode"])
+  #set $epLoc = $epResult["location"]
+  <tr class="$Overview.overviewStrings[$epCats[$epStr]] season-$curSeason">
+    <td class="hideon-phone" width="1%">
+#if int($epResult["status"]) != $UNAIRED
+      <input type="checkbox" class="epCheck" id="<%=str(epResult["season"])+'x'+str(epResult["episode"])%>" name="<%=str(epResult["season"]) +"x"+str(epResult["episode"]) %>" />
+#end if
+    </td>
+    <td  class="hideon-phone" align="center">#if $epResult["hasnfo"] == 1 then "<i class=\"icon-ok\"></i>" else "<i class=\"icon-remove\"></i>"#</td>
+    <td  class="hideon-phone" align="center">#if $epResult["hastbn"] == 1 then "<i class=\"icon-ok\"></i>" else "<i class=\"icon-remove\"></i>"#</td>
+    <td align="center">$epResult["episode"]</td>
+    <td>
+    #if $epResult["description"] != "" and $epResult["description"] != None:
+    <span class="plotInfo" id="plot_info_$show.tvdbid<%="_"+str(epResult["season"])+"_"+str(epResult["episode"])%>">$epResult["name"]
+    <i class="icon-question-sign"></i></span>
+    #else
+    $epResult["name"]
+    #end if
+    </td>
+    <td align="center" class="hideon-phone nowrap">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
+    <td  class="hideon-phone">
+#if $epLoc and $show._location and $epLoc.lower().startswith($show._location.lower()):
+$epLoc[len($show._location)+1:]
+#elif $epLoc and (not $epLoc.lower().startswith($show._location.lower()) or not $show._location):
+$epLoc
+#end if
+
+    </td>
+<td class="status_column $epResult["status"]"><span class="badge $statusStrings[int($epResult["status"])]">$statusStrings[int($epResult["status"])]</span></td>
+    <td align="center">
+    #if int($epResult["season"]) != 0:
+      <a class="epSearch" href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><i class="icon-search"></i></a>
+    #end if
+    </td>
+   </tr>
+
+#end for
+</table><br />
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

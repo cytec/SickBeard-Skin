@@ -1,0 +1,173 @@
+#import os.path
+#import sickbeard
+#from sickbeard.common import *
+#from sickbeard import config
+#from sickbeard import metadata
+#from sickbeard.metadata.generic import GenericMetadata
+#set global $title  = "Config - General"
+#set global $header = "General Configuration"
+
+#set global $sbPath="../.."
+
+#set global $topmenu="config"#
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+
+<script type="text/javascript" src="$sbRoot/js/config.js"></script>
+
+<div id="config">
+<div id="config-content">
+    <div class="alert">
+        <h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.DATA_DIR</span> "</h5>
+    </div>
+<form id="configForm" action="saveGeneral" class="form form-horizontal" method="post">
+    <fieldset>
+        <legend>Misc
+            <small>Startup options.</small>
+            <p><b>Some options may require a manual restart to take effect.</b></p>
+        </legend>
+        <div class="control-group">
+            <label class="control-label" for="launch_browser">Launch Browser</label>
+            <div class="controls">
+                <label class="checkbox">
+                    <input type="checkbox" class="checkbox inline" name="launch_browser" id="launch_browser" #if $sickbeard.LAUNCH_BROWSER then "checked=\"checked\"" else ""#/>
+                    Should Sick Beard open its home page when started?
+                </label>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="version_notify">Check for Update</label>
+            <div class="controls">
+                <label class="checkbox">
+                    <input type="checkbox" class="checkbox inline" name="version_notify" id="version_notify" #if $sickbeard.VERSION_NOTIFY then "checked=\"checked\"" else ""#/>
+                    Show notification about updates for Sick Beard if available.
+                    <p class="help-block">Checking for updates runs on startup and every 12 hours.</p>
+                </label>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="log_dir">Logging Directory</label>
+            <div class="controls">
+                <div class="input-append">
+                    <input type="text" class="input-xlarge" name="log_dir" id="log_dir" value="$sickbeard.LOG_DIR" size="35">
+                    <p class="help-block">The directory where Sick Beard should store your <b>Log</b> files.</p>
+                </div>
+            </div>
+        </div>
+         <div class="form-actions">
+            <input type="submit" class="config_submitter btn btn-success" value="Save Changes" /><br/>
+        </div>
+    </fieldset>            
+    <fieldset>
+        <legend>Web Interface
+            <small>These options require a manual restart to take effect.</small>
+            <p><b>It is recommended that you enable a username and password to secure Sick Beard from being tampered with remotely.</b></p>
+        </legend>
+        <div class="control-group">
+            <label class="control-label" for="web_ipv6">Listen on IPv6</label>
+            <div class="controls">
+                <label class="checkbox">
+                    <input type="checkbox" class="checkbox inline" name="web_ipv6" id="web_ipv6" #if $sickbeard.WEB_IPV6 then "checked=\"checked\"" else ""#/>
+                    Allow Sick Beard to bind to any available IPv6 address?
+                </label>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="web_log">HTTP Logs</label>
+            <div class="controls">
+                <label class="checkbox">
+                    <input type="checkbox" class="checkbox inline" name="web_log" id="web_log" #if $sickbeard.WEB_LOG then "checked=\"checked\"" else ""#/>
+                    Have Sick Beard's web server (cherrypy) generate logs?
+                </label>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="web_port">HTTP Port</label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" name="web_port" id="web_port" value="$sickbeard.WEB_PORT" size="10">
+                <p class="help-block">Web port that Sick Beard should listen on (eg. 8081)</p>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="web_username">HTTP Username</label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" name="web_username" id="web_username" value="$sickbeard.WEB_USERNAME" size="35">
+                <p class="help-block">Username for authentication (blank for none)</p>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="web_password">HTTP Password</label>
+            <div class="controls">
+                <input type="password" class="input-xlarge" name="web_password" id="web_password" value="$sickbeard.WEB_PASSWORD" size="35">
+                <p class="help-block">Password for authentication (blank for none)</p>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="enable_https">Enable HTTPS</label>
+            <div class="controls">
+                <label class="checkbox">
+                    <input type="checkbox" class="checkbox enabler inline" name="enable_https" id="enable_https" #if $sickbeard.ENABLE_HTTPS then "checked=\"checked\"" else ""#/>
+                    Enable accessing the interface from a HTTPS address.
+                </label>
+            </div>
+        </div>
+        <div id="content_enable_https">
+            <div class="control-group">
+                <label class="control-label" for="https_cert">HTTPS Certificate</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="https_cert" id="https_cert" value="$sickbeard.HTTPS_CERT" size="35">
+                    <p class="help-block">File name or path to HTTPS Certificate.</p>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="https_key">HTTPS Key</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="https_key" id="https_key" value="$sickbeard.HTTPS_KEY" size="35">
+                    <p class="help-block">File name or path to HTTPS Key.</p>
+                </div>
+            </div>
+        </div>
+        <div class="form-actions">
+            <input type="submit" class="config_submitter btn btn-success" value="Save Changes" /><br/>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>API
+            <small>Allow 3rd party programs to interact with Sick-Beard.</small>
+        </legend>                  
+        <div class="control-group">
+            <label class="control-label" for="use_api">Enable API</label>
+            <div class="controls">
+                <label class="checkbox">
+                    <input type="checkbox" class="checkbox enabler inline" name="use_api" id="use_api" #if $sickbeard.USE_API then "checked=\"checked\"" else ""#/>
+                    Allow the use of the Sick-Beard API.
+                </label>
+            </div>
+        </div>
+        <div id="content_use_api">
+            <div class="control-group">
+                <label class="control-label" for="api_key">API Key</label>
+                <div class="controls">
+                    <div class="input-append">
+                        <input type="text" class="input-xlarge" name="api_key" id="api_key" readonly="readonly" value="$sickbeard.API_KEY" size="40"><input type="button" id="generate_new_apikey" class="btn" value="Generate">
+                        <p class="help-block">Used to give 3rd party programs limited access to Sick-Beard.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-actions">
+            <input type="submit" class="config_submitter btn btn-success" value="Save Changes" /><br/>
+        </div>
+    </fieldset>
+
+
+</form>
+</div></div>
+<div class="clearfix"></div>
+
+<script type="text/javascript" charset="utf-8">
+<!--
+    jQuery('#log_dir').fileBrowser({ title: 'Select Log Directory' });
+//-->
+</script>
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

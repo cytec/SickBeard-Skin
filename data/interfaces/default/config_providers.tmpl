@@ -1,0 +1,269 @@
+#import sickbeard
+#from sickbeard.providers.generic import GenericProvider
+#set global $title="Config - Providers"
+#set global $header="Search Providers"
+
+#set global $sbPath="../.."
+
+#set global $topmenu="config"#
+#import os.path
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+
+<script type="text/javascript" src="$sbRoot/js/configProviders.js"></script>
+<script type="text/javascript" src="$sbRoot/js/config.js"></script>
+<script type="text/javascript" charset="utf-8">
+<!--
+\$(document).ready(function(){
+
+var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
+#for $curNewznabProvider in $sickbeard.newznabProviderList:
+\$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default), show_nzb_providers);
+#end for
+});
+//-->
+</script>
+
+<div id="config">
+<div id="config-content">
+
+<form id="configForm" action="saveProviders" method="post" class="form-horizontal">
+    <fieldset>
+        <legend>Provider Priorities
+            <small>Check off and drag the providers into the order you want them to be used.</small>
+            <p class="alert">At least one provider is required but two are recommended.</p>
+            <p>NZB/Torrent providers can be toggled in <a href="$sbRoot/config/search">Search Settings</a></p>
+        </legend>
+        <div class="well">
+            <div class="control-group">
+                <label class="control-label" for="provider_order_list">NZB Providers</label>
+                <div class="controls">
+                    <ul class="unstyled" id="provider_order_list">
+                        #for $curProvider in $sickbeard.providers.sortedProviderList():
+                            #if $curProvider.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
+                                #continue
+                            #elif $curProvider.providerType == $GenericProvider.TORRENT and not $sickbeard.USE_TORRENTS:
+                                #continue
+                            #end if
+                            #set $curName = $curProvider.getID()
+                          <li class="ui-state-default" id="$curName">
+                            <input type="checkbox" id="enable_$curName" class="provider_enabler" #if $curProvider.isEnabled() then "checked=\"checked\"" else ""#/>
+                            <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$curProvider.imageName()" alt="$curProvider.name" title="$curProvider.name" width="16" height="16" /></a>
+                            $curProvider.name
+                            #if not $curProvider.supportsBacklog then "*" else ""#
+                            #if $curProvider.name == "EZRSS" then "**" else ""#
+                          </li>
+                        #end for
+                       </ul>
+                </div>
+            </div>
+        </div>
+        <div class="form-actions">
+            <input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join([x.getID()+':'+str(int(x.isEnabled())) for x in sickbeard.providers.sortedProviderList()])%>"/>
+            <input type="submit" class="config_submitter btn btn-success" value="Save Changes" /><br/>
+        </div>
+    </fieldset>
+
+
+    <fieldset>
+        <legend>Configure Built-In Providers
+            <small>Check with provider's website on how to obtain an API key if needed.</small>
+        </legend>
+        <div class="control-group">
+            <label class="control-label" for="editAProvider">Configure Provider:</label>
+            <div class="controls">
+                                    #set $provider_config_list = []
+                                    #for $cur_provider in ("nzbs_org", "nzbs_r_us", "newzbin", "nzbmatrix", "tvtorrents", "btn"):
+                                        #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
+                                        #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
+                                            #continue
+                                        #elif $cur_provider_obj.providerType == $GenericProvider.TORRENT and not $sickbeard.USE_TORRENTS:
+                                            #continue
+                                        #end if
+                                        $provider_config_list.append($cur_provider_obj)
+                                    #end for
+
+                                    #if $provider_config_list:                                        
+                                    <select id="editAProvider">
+                                        #for $cur_provider in $provider_config_list + [$curProvider for $curProvider in $sickbeard.newznabProviderList if $curProvider.default and $curProvider.needs_auth]:
+                                            <option value="$cur_provider.getID()">$cur_provider.name</option>
+                                        #end for
+                                    </select>
+                                    #else:
+                                    No providers available to configure.
+                                    #end if
+                <p class="help-block">Change Settings for Provider</p>
+            </div>
+        </div>
+
+        <!-- NEWZNAB -->
+        #for $curNewznabProvider in [$curProvider for $curProvider in $sickbeard.newznabProviderList if $curProvider.default and $curProvider.needs_auth]:
+        <div class="providerDiv" id="${curNewznabProvider.getID()}Div">
+            <div class="control-group">
+                <label class="control-label" for="nzb_dir">$curNewznabProvider.name URL</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="nzb_dir" id="${curNewznabProvider.getID()}_url" value="$curNewznabProvider.url" size="45">
+                    <p class="help-block">Newznab Provider URL</p>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="nzb_dir">$curNewznabProvider.name API Key</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" id="${curNewznabProvider.getID()}_hash" value="$curNewznabProvider.key" size="45">
+                    <p class="help-block">Newznab Provider URL</p>
+                </div>
+            </div>
+        </div>
+        #end for         
+        <div id="nzbs_orgDiv" class="providerDiv">
+            <div class="control-group">
+                <label class="control-label" for="nzbs_org_uid">NZBs.org UID</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="nzbs_org_uid" value="$sickbeard.NZBS_UID" size="45">
+                </div>
+            </div>   
+            <div class="control-group">
+                <label class="control-label" for="nzbs_org_hash">NZBs.org Hash</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="nzbs_org_hash" value="$sickbeard.NZBS_HASH" size="45">
+                </div>
+            </div>  
+        </div>
+        <div id="nzbmatrixDiv" class="providerDiv">
+            <div class="control-group">
+                <label class="control-label" for="nzbmatrix_username">NZBMatrix Username</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="nzbmatrix_username" value="$sickbeard.NZBMATRIX_USERNAME" size="45">
+                </div>
+            </div>   
+            <div class="control-group">
+                <label class="control-label" for="nzbmatrix_apikey">NZBMatrix API Key</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="nzbmatrix_apikey" value="$sickbeard.NZBMATRIX_APIKEY" size="45">
+                </div>
+            </div>  
+        </div>
+        <div id="newzbinDiv" class="providerDiv">
+            <div class="control-group">
+                <label class="control-label" for="newzbin_username">Newzbin Username</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="newzbin_username" value="$sickbeard.NEWZBIN_USERNAME" size="45">
+                </div>
+            </div>   
+            <div class="control-group">
+                <label class="control-label" for="newzbin_password">Newzbin Password</label>
+                <div class="controls">
+                    <input type="password" class="input-xlarge" name="newzbin_password" value="$sickbeard.NEWZBIN_PASSWORD" size="45">
+                </div>
+            </div>  
+        </div>
+        <div id="nzbs_r_usDiv" class="providerDiv">
+            <div class="control-group">
+                <label class="control-label" for="nzbs_r_us_uid">NZBs'R'US UID</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="nzbs_r_us_uid" value="$sickbeard.NZBSRUS_UID" size="45">
+                </div>
+            </div>   
+            <div class="control-group">
+                <label class="control-label" for="nzbs_r_us_hash">NZBs'R'US Hash</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="nzbs_r_us_hash" value="$sickbeard.NZBSRUS_HASH" size="45">
+                </div>
+            </div>  
+        </div>
+        <div id="tvtorrentsDiv" class="providerDiv">
+            <div class="control-group">
+                <label class="control-label" for="tvtorrents_digest">TvTorrents Digest</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="tvtorrents_digest" value="$sickbeard.TVTORRENTS_DIGEST" size="45">
+                </div>
+            </div>   
+            <div class="control-group">
+                <label class="control-label" for="tvtorrents_hash">TvTorrents Hash</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="tvtorrents_hash" value="$sickbeard.TVTORRENTS_HASH" size="45">
+                </div>
+            </div>  
+        </div>
+        <div id="btnDiv" class="providerDiv">
+            <div class="control-group">
+                <label class="control-label" for="btn_user_id">BTN User ID</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="btn_user_id" value="$sickbeard.BTN_USER_ID" size="45">
+                </div>
+            </div>   
+            <div class="control-group">
+                <label class="control-label" for="btn_auth_token">BTN Auth Token</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="btn_auth_token" value="$sickbeard.BTN_AUTH_TOKEN" size="32">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="btn_passkey">BTN Passkey</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="btn_passkey" value="$sickbeard.BTN_PASSKEY" size="32">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="btn_authkey">BTN Authkey</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="btn_authkey" value="$sickbeard.BTN_AUTHKEY" size="32">
+                </div>
+            </div>  
+        </div>
+        <div class="form-actions">
+            <input type="submit" class="config_submitter btn btn-success" value="Save Changes" /><br/>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Configure Custom Newznab Providers
+            <small>Add and setup custom Newznab providers.</small>
+        </legend>
+        <div class="control-group">
+            <label class="control-label" for="search_frequency">Select Provider:</label>
+            <div class="controls">
+                <input type="hidden" name="newznab_string" id="newznab_string" />
+                    <select id="editANewznabProvider">
+                        <option value="addNewznab">-- add new provider --</option>
+                    </select>
+            </div>
+        </div>
+        <div class="newznabProviderDiv" id="addNewznab">
+            <div class="control-group">
+                <label class="control-label" for="newznab_name">Provider Name</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="newznab_name" id="newznab_name" size="40">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="newznab_url">Site URL</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="newznab_url" id="newznab_url" size="40">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="newznab_key">API Key</label>
+                <div class="controls">
+                    <input type="text" class="input-xlarge" name="newznab_key" id="newznab_key" size="40">
+                    <p class="help-block">leave blank if not required</p>
+                </div>
+            </div>
+            <div class="form-actions">
+                <div id="newznab_add_div">
+                    <input type="button" class="newznab_save btn btn-success" id="newznab_add" value="Add" />
+                </div>
+                <div id="newznab_update_div" style="display: none;">
+                    <input type="button" class="newznab_delete btn btn-danger" id="newznab_delete" value="Delete" />
+                </div> 
+                
+            </div>
+            <div class="form-actions">
+                <input type="submit" class="config_submitter btn btn-success" value="Save Changes" />
+            </div>
+        </div>
+
+</form>
+</div></div>
+<div class="clearfix"></div>
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

@@ -1,0 +1,47 @@
+#import os.path
+#import urllib
+#import sickbeard
+#set global $title="Add Show"
+
+#set global $sbPath="../.."
+
+#set global $statpath="../.."#
+#set global $topmenu="home"#
+#import os.path
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+
+<script type="text/javascript" charset="utf-8">
+<!--
+\$(document).ready(function(){  
+
+    \$('#btnNewShow').click(function() {
+      window.location = '$sbRoot/home/addShows/newShow';
+    });
+    \$('#btnExistingShow').click(function() {
+      window.location = '$sbRoot/home/addShows/existingShows';
+    });
+
+});
+//-->
+</script>
+
+<div class="row">
+    <div class="span12">
+        <div class="hero-unit">
+            <div class="row">
+                <div class="span12"> <h2>Add existing or new Shows</h2></div>
+                <div class="span4">
+                    <p>For shows that you haven't downloaded yet, this option finds a show on theTVDB.com, creates a directory for its episodes, and adds it to Sick Beard.</p>
+                    <button id="btnNewShow" class="btn btn-success btn-large"><i class="icon-white icon-plus"></i> Add New Show</button>
+                </div>
+                <div class="span4 offset2">
+                    <p>Use this option to add shows that already have a folder created on your hard drive. Sick Beard will scan your existing metadata/episodes and add the show accordingly.</p>
+                    <button id="btnExistingShow" class="btn btn-large"><i class="icon-plus"></i> Add Existing Show</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

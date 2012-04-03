@@ -1,0 +1,142 @@
+#import sickbeard
+#from sickbeard.common import *
+#set global $title="Mass Update"
+
+#set global $sbPath="../.."
+
+#set global $topmenu="manage"#
+#import os.path
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+
+<script type="text/javascript" charset="utf-8">
+<!--
+\$.tablesorter.addParser({
+    id: 'showNames',
+    is: function(s) {
+        return false;
+    }, 
+    format: function(s) { 
+        if (s.indexOf('The ') == 0)
+            return s.replace('The ', '')
+        else if (s.indexOf('A ') == 0)
+            return s.replace('A ', '')
+        else
+            return s;
+    },
+    type: 'text'
+});
+
+\$.tablesorter.addParser({
+    id: 'images',
+    is: function(s) {
+        return false;
+    }, 
+    format: function(s) {
+        if (s == '')
+            return '~~';
+        else
+            return s;
+    },
+    type: 'text'
+});
+
+\$(document).ready(function() 
+{ 
+    \$("#massUpdateTable:has(tbody tr)").tablesorter({
+        sortList: [[2,0]],
+        widgets: ['zebra'],
+        headers: {
+            0: { sorter: false},
+            1: { sorter: 'images'},
+            2: { sorter: 'showNames'},
+            4: { sorter: 'images'},
+            5: { sorter: 'images'},
+            7: { sorter: false},
+            8: { sorter: false},
+            9: { sorter: false},
+            10: { sorter: false}
+        }
+    }); 
+});
+//-->
+</script>
+<script type="text/javascript" src="$sbRoot/js/massUpdate.js"></script>
+
+<form name="massUpdateForm" method="post" action="massUpdate">
+
+<table id="massUpdateTable" class="table table-striped table-bordered table-condensed tablesorter" cellspacing="1" border="0" cellpadding="0">
+  <thead>
+    <tr>
+      <th width="1%">Edit&nbsp;<input type="checkbox" class="bulkCheck" id="editCheck" /></th>
+      <th class="nowrap"><i class="icon-white"></i> Lang</th>
+      <th class="nowrap"><i class="icon-white"></i> Show Name</th>
+      <th><i class="icon-white"></i> Quality</th>
+      <th><i class="icon-white"></i> Season Folders</th> 
+      <th><i class="icon-white"></i> Paused</th>
+      <th><i class="icon-white"></i> Status</th>
+      <th width="1%">Update&nbsp;<input type="checkbox" class="bulkCheck" id="updateCheck" /></th>
+      <th width="1%">Rescan&nbsp;<input type="checkbox" class="bulkCheck" id="refreshCheck" /></th>
+      <th width="1%">Rename&nbsp;<input type="checkbox" class="bulkCheck" id="renameCheck" /></th>
+<!--      <th>Force Metadata Regen <input type="checkbox" class="bulkCheck" id="metadataCheck" /></th>//-->
+      <th width="1%">Delete&nbsp;<input type="checkbox" class="bulkCheck" id="deleteCheck" /></th>
+    </tr>
+  </thead>
+<tfoot>
+  <tr>
+    <td rowspan="1" colspan="1" align="center"><input type="button" class="btn" value="Edit Selected" id="submitMassEdit" /></td>
+    <td rowspan="1" colspan="10" align="right"><input type="button" class="btn" value="Submit" id="submitMassUpdate" /></td>
+  </tr>
+</tfoot>
+  <tbody>
+#set $myShowList = $sickbeard.showList
+$myShowList.sort(lambda x, y: cmp(x.name, y.name))
+#for $curShow in $myShowList:
+#set $curEp = $curShow.nextEpisode()
+#set $curUpdate_disabled = ""
+#set $curRefresh_disabled = ""
+#set $curRename_disabled = ""
+#set $curDelete_disabled = ""
+
+#if $sickbeard.showQueueScheduler.action.isBeingUpdated($curShow) or $sickbeard.showQueueScheduler.action.isInUpdateQueue($curShow):
+  #set $curUpdate_disabled = "disabled=\"disabled\" "
+#end if
+#set $curUpdate = "<input type=\"checkbox\" class=\"updateCheck\" id=\"update-"+str($curShow.tvdbid)+"\" "+$curUpdate_disabled+"/>"
+#if $sickbeard.showQueueScheduler.action.isBeingRefreshed($curShow) or $sickbeard.showQueueScheduler.action.isInRefreshQueue($curShow):
+  #set $curRefresh_disabled = "disabled=\"disabled\" "
+#end if
+#set $curRefresh = "<input type=\"checkbox\" class=\"refreshCheck\" id=\"refresh-"+str($curShow.tvdbid)+"\" "+$curRefresh_disabled+"/>"
+#if $sickbeard.showQueueScheduler.action.isBeingRenamed($curShow) or $sickbeard.showQueueScheduler.action.isInRenameQueue($curShow):
+  #set $curRename = "disabled=\"disabled\" "
+#end if
+#set $curRename = "<input type=\"checkbox\" class=\"renameCheck\" id=\"rename-"+str($curShow.tvdbid)+"\" "+$curRename_disabled+"/>"
+#if $sickbeard.showQueueScheduler.action.isBeingRenamed($curShow) or $sickbeard.showQueueScheduler.action.isInRenameQueue($curShow) or $sickbeard.showQueueScheduler.action.isInRefreshQueue($curShow):
+  #set $curDelete = "disabled=\"disabled\" "
+#end if
+#set $curDelete = "<input type=\"checkbox\" class=\"deleteCheck\" id=\"delete-"+str($curShow.tvdbid)+"\" "+$curDelete_disabled+"/>"
+
+  <tr>
+    <td align="center"><input type="checkbox" class="editCheck" id="edit-$curShow.tvdbid" /></td>
+    <td align="center"><img src="$sbRoot/images/flags/${curShow.lang}.png" width="16" height="11" alt="$curShow.lang" /></td>
+    <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
+#if $curShow.quality in $qualityPresets:
+    <td align="center"><span class="quality label $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>
+#else:
+    <td align="center"><span class="quality label Custom">Custom</span></td>
+#end if 
+    <td align="center">#if int($curShow.seasonfolders) == 1 then "<i class=\"icon-ok\"></i>" else "<i class=\"icon-remove\"></i>"#</td>
+    <td align="center">#if int($curShow.paused) == 1 then "<i class=\"icon-ok\"></i>" else "<i class=\"icon-remove\"></i>"#</td>
+    <td align="center">$curShow.status</td>
+    <td align="center">$curUpdate</td>
+    <td align="center">$curRefresh</td>
+    <td align="center">$curRename</td>
+<!--    <td align="center"><input type="checkbox" class="metadataCheck" id="metadata-$curShow.tvdbid" /></td>//-->
+    <td align="center">$curDelete</td>
+  </tr>
+#end for
+</tbody>
+</table>
+
+</form>
+
+<script type="text/javascript" src="$sbRoot/js/tableClick.js"></script>
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

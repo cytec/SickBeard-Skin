@@ -99,22 +99,22 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
         #for $curNewznabProvider in [$curProvider for $curProvider in $sickbeard.newznabProviderList if $curProvider.default and $curProvider.needs_auth]:
         <div class="providerDiv" id="${curNewznabProvider.getID()}Div">
             <div class="control-group">
-                <label class="control-label" for="nzb_dir">$curNewznabProvider.name URL</label>
+                <label class="control-label">$curNewznabProvider.name URL</label>
                 <div class="controls">
-                    <input type="text" class="input-xlarge" name="nzb_dir" id="${curNewznabProvider.getID()}_url" value="$curNewznabProvider.url" size="45">
+                    <input type="text" class="input-xlarge" id="${curNewznabProvider.getID()}_url" value="$curNewznabProvider.url" size="40">
                     <p class="help-block">Newznab Provider URL</p>
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label" for="nzb_dir">$curNewznabProvider.name API Key</label>
+                <label class="control-label">$curNewznabProvider.name API Key</label>
                 <div class="controls">
-                    <input type="text" class="input-xlarge" id="${curNewznabProvider.getID()}_hash" value="$curNewznabProvider.key" size="45">
-                    <p class="help-block">Newznab Provider URL</p>
+                    <input type="text" class="input-xlarge" id="${curNewznabProvider.getID()}_hash" value="$curNewznabProvider.key" size="40">
+                    <p class="help-block">Newznab Provider API Key</p>
                 </div>
             </div>
         </div>
         #end for         
-        <div id="nzbs_orgDiv" class="providerDiv">
+        <!-- <div id="nzbs_orgDiv" class="providerDiv">
             <div class="control-group">
                 <label class="control-label" for="nzbs_org_uid">NZBs.org UID</label>
                 <div class="controls">
@@ -127,7 +127,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                     <input type="text" class="input-xlarge" name="nzbs_org_hash" value="$sickbeard.NZBS_HASH" size="45">
                 </div>
             </div>  
-        </div>
+        </div> -->
         <div id="nzbmatrixDiv" class="providerDiv">
             <div class="control-group">
                 <label class="control-label" for="nzbmatrix_username">NZBMatrix Username</label>
@@ -220,7 +220,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
             <small>Add and setup custom Newznab providers.</small>
         </legend>
         <div class="control-group">
-            <label class="control-label" for="search_frequency">Select Provider:</label>
+            <label class="control-label">Select Provider:</label>
             <div class="controls">
                 <input type="hidden" name="newznab_string" id="newznab_string" />
                     <select id="editANewznabProvider">
@@ -232,19 +232,19 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
             <div class="control-group">
                 <label class="control-label" for="newznab_name">Provider Name</label>
                 <div class="controls">
-                    <input type="text" class="input-xlarge" name="newznab_name" id="newznab_name" size="40">
+                    <input type="text" class="input-xlarge" id="newznab_name" size="40">
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label" for="newznab_url">Site URL</label>
                 <div class="controls">
-                    <input type="text" class="input-xlarge" name="newznab_url" id="newznab_url" size="40">
+                    <input type="text" class="input-xlarge" id="newznab_url" size="40">
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label" for="newznab_key">API Key</label>
                 <div class="controls">
-                    <input type="text" class="input-xlarge" name="newznab_key" id="newznab_key" size="40">
+                    <input type="text" class="input-xlarge" id="newznab_key" size="40">
                     <p class="help-block">leave blank if not required</p>
                 </div>
             </div>

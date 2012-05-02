@@ -184,6 +184,13 @@ footer{
 	-moz-hyphens: auto;
 }
 
+.flag {
+    background-color: #FFFFFF;
+    background-position: 10px 50%;
+    background-repeat: no-repeat;
+    padding-left: 35px;
+}
+
 @media (max-width:767px){
   .hideon-phone{display:none;} 
 }

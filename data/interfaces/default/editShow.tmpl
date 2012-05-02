@@ -18,8 +18,7 @@
         var resultStr = '';
 
         if (data.results.length == 0) {
-            flag = ' class="flag" style="background-image:url($sbRoot/images/flags/${show.lang}.png)"';
-            resultStr = '<option value="$show.lang" selected="selected" + flag>$show.lang</option>';
+            resultStr = '<option value="$show.lang" selected="selected">$show.lang</option>';
         } else {
             var current_lang_added = false;
             \$.each(data.results, function(index, obj){
@@ -32,8 +31,7 @@
                         selected = '';
                 }
 
-                flag = ' class="flag" style="background-image:url($sbRoot/images/flags/' + obj + '.png);"';
-                resultStr += '<option value="' + obj + '"' + selected + flag + '>' + obj + '</option>';
+                resultStr += '<option value="' + obj + '"' + selected + '>' + obj + '</option>';
             });
             if (!current_lang_added)
                 resultStr += '<option value="$show.lang" selected="selected">$show.lang</option>';

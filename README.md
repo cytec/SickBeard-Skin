@@ -7,4 +7,7 @@
 Download all files and replace the data folder inside your SickBeard directory.
 You may want to make a backup copy of the original one ;)
 
-have fun
+have fun 
+
+
+Multilanguage version of this Skin in development: https://github.com/Technosoft2000/SickBeard-Skin

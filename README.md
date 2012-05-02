@@ -10,4 +10,4 @@ You may want to make a backup copy of the original one ;)
 have fun 
 
 
-Multilanguage version of this Skin in development: https://github.com/Technosoft2000/SickBeard-Skin
+Multilanguage version of this Skin in development: https://github.com/Technosoft2000/SickBeard-Skin, will be merged asap

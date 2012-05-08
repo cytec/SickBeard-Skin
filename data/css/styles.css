@@ -128,11 +128,11 @@ table th{
 
 /* DOWNLOADED WANTED SKIPPED */
 
-.Downloaded, .Snatched{
+.Downloaded, .Snatched, .Archived{
 	background-color:#468847;
 }
 
-.Downloaded:hover, .Snatched:hover{
+.Downloaded:hover, .Snatched:hover, .Archived:hover{
 	background-color:#356635;
 }
 
